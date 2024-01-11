@@ -19,14 +19,6 @@ class PairModel():
 
 Separator = lambda: flet.Divider(color = config.color)
 
-class KeyValuePair(flet.Column):
-  def __init__(self, t1: str = "", t2: str = ""):
-    super().__init__()
-    self.__key = flet.Text("", spans = [flet.TextSpan(t1)])
-    self.__value = flet.Text("", spans = [flet.TextSpan(t2)])
-
-    self.controls.append(flet.Row([self.__key, self.__value]))
-
 class CoinComponent(flet.Tab):
   def __init__(self, pair: PairModel("", ""), on_update = lambda: print("update")):
     super().__init__()
