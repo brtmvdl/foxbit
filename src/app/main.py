@@ -36,10 +36,34 @@ class CoinComponent(flet.Tab):
     self.content = flet.Column([Separator(), top, Separator(), self.__buys])
     self.set_interval(self.update_text, 1.25)
 
+  def createKeyValuePair(self, key, value):
+    return flet.Column([
+      flet.Text(str(key)), 
+      flet.Text(str(value)),
+    ])
+
   def on_buy_click(self, e):
-    print(f"datetime: {self.__datetime.value}")
-    print(f"price: {self.__price.value}")
-    print(f"amount: {self.__amount.value}")
+    t = threading.Thread(target = self.buy, args = ())
+    t.start()
+
+  def buy(self):
+    sell = flet.Column()
+
+    def on_sell():
+      sell.controls.append(self.createKeyValuePair("datetime: ", ""))
+      sell.controls.append(self.createKeyValuePair("price: ", ""))
+      sell.controls.append(self.createKeyValuePair("gain: ", ""))
+
+    buy = flet.Column()
+    buy.controls.append(self.createKeyValuePair("datetime: ", ""))
+    buy.controls.append(self.createKeyValuePair("price: ", ""))
+    buy.controls.append(self.createKeyValuePair("amount: ", ""))
+
+    self.__buys.controls.append(buy)
+    self.__buys.controls.append(sell)
+    self.__buys.controls.append(flet.TextButton("Sell", on_sell))
+
+    self.on_update()
 
   def update_text(self):
     self.__datetime.value = str(datetime.datetime.now())
