@@ -30,7 +30,7 @@ class CoinComponent(flet.Tab):
     self.__amount = flet.TextField(label = "Amount", input_filter = flet.NumbersOnlyInputFilter())
     self.__buy = flet.TextButton("Buy", on_click=self.on_buy_click)
 
-    self.__buys = flet.Row([])
+    self.__buys = flet.Column([])
     top = flet.Row([flet.Text("datetime: "), self.__datetime,  flet.Text("price: "), self.__price, self.__amount, self.__buy,])
 
     self.content = flet.Column([Separator(), top, Separator(), self.__buys])
@@ -43,25 +43,21 @@ class CoinComponent(flet.Tab):
     ])
 
   def on_buy_click(self, e):
-    t = threading.Thread(target = self.buy, args = ())
-    t.start()
+    sell = flet.Row()
 
-  def buy(self):
-    sell = flet.Column()
-
-    def on_sell():
-      sell.controls.append(self.createKeyValuePair("datetime: ", ""))
-      sell.controls.append(self.createKeyValuePair("price: ", ""))
+    def on_sell(e):
+      sell.controls.append(self.createKeyValuePair("datetime: ", self.__datetime.value))
+      sell.controls.append(self.createKeyValuePair("price: ", self.__price.value))
       sell.controls.append(self.createKeyValuePair("gain: ", ""))
 
-    buy = flet.Column()
-    buy.controls.append(self.createKeyValuePair("datetime: ", ""))
-    buy.controls.append(self.createKeyValuePair("price: ", ""))
-    buy.controls.append(self.createKeyValuePair("amount: ", ""))
+    buy = flet.Row()
+    buy.controls.append(self.createKeyValuePair("datetime: ", self.__datetime.value))
+    buy.controls.append(self.createKeyValuePair("price: ", self.__price.value))
+    buy.controls.append(self.createKeyValuePair("amount: ", self.__amount.value))
 
     self.__buys.controls.append(buy)
     self.__buys.controls.append(sell)
-    self.__buys.controls.append(flet.TextButton("Sell", on_sell))
+    self.__buys.controls.append(flet.TextButton("Sell", on_click = on_sell))
 
     self.on_update()
 
