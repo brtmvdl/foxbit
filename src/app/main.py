@@ -59,7 +59,11 @@ class CoinComponent(flet.Tab):
 
 def main(page: flet.Page):
   page.title = config.app_name
-  page.add(flet.Tabs(tabs = [CoinComponent(PairModel("btc", "brl"), lambda: page.update())]))
+  page.add(flet.Tabs(tabs = [
+    CoinComponent(PairModel("btc", "brl"), lambda: page.update()),
+    CoinComponent(PairModel("eth", "brl"), lambda: page.update()),
+    CoinComponent(PairModel("ltc", "brl"), lambda: page.update()),
+  ]))
 
 if __name__ == "__main__":
   flet.app(target = main)
