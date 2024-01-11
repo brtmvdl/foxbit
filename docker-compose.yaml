@@ -10,4 +10,6 @@ services:
   proxy:
     build: './src/proxy'
     volumes:
-      - './src/proxy:/app'
+      - './src/proxy/html:/usr/share/nginx/html'
+    ports:
+      - '8080:80'
