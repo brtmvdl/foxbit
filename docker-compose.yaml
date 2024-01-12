@@ -1,6 +1,7 @@
 version: '3'
 
 services:
+
   app:
     build: './src/app'
     volumes:
@@ -10,10 +11,3 @@ services:
     build: './src/cli'
     volumes:
       - './src/cli:/app'
-
-  proxy:
-    build: './src/proxy'
-    volumes:
-      - './src/proxy/html:/usr/share/nginx/html'
-    ports:
-      - '8080:80'
