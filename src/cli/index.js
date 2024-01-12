@@ -1,63 +1,75 @@
+const { Database, DatabaseObject } = require('@brtmvdl/database')
+const db = new Database({ config: '/data', type: 'fs' })
 const readline = require('readline')
-const pairs = ['BTCBRL', 'LTCBRL', 'ETHBRL', 'USDTBRL']
-const buys = []
-const options = { pair: '', buy: '' }
+const pairs = require('./pairs.js')
 
 class Buy {
-  constructor(pair, amount, datetime = Date.now()) {
-    this.pair = pair
-    this.amount = amount
-    this.datetime = datetime
+  constructor(buy = new DatabaseObject) {
+    this.pair = buy.read('pair')
+    this.amount = buy.read('amount')
+    this.datetime = (new Date(buy.read('datetime'))).toLocaleString()
   }
 
   toString() {
     const { pair, amount, datetime } = this
-
-    return `pair: ${pair}; amount: ${amount}; datetime: ${(new Date(datetime).toLocaleString())}`
+    return `pair: ${pair}; amount: ${amount}; datetime: ${datetime}`
   }
 }
 
-const getMenuOption = async (lines = [], options = [], incr = 0) => {
-  console.log([...lines, ...options.map((opt, ix) => `${ix + incr}) ${opt}`)].join('\r\n'))
-  return await new Promise((res) => readline.createInterface({ input: process.stdin, output: process.stdout, terminal: false }).on('line', res))
-}
-
-const pairsMenu = async () => {
-  const opt = await getMenuOption(['---- Pairs Menu ----'], ['Exit', ...pairs])
-  options.pair = pairs?.[+opt - 1]
-}
-
-const buyMenu = async () => {
-  const opt = await getMenuOption([`---- Buy ${options.pair} ----`, 'How much: '])
-  buys.push(new Buy(options.pair, opt, Date.now()))
-}
-
-const sellMenu = async () => {
-  const opt = await getMenuOption(['---- Sell Menu ----'], ['Exit'])
-  console.log('sell menu', opt)
-}
-
-const buysMenu = async () => {
-  const opt = await getMenuOption(['---- Buys ----'], ['Exit', ...buys])
-  if (opt !== '0') {
-    options.buy = buys?.[+opt - 1]
-    sellMenu()
+class Foxbit {
+  state = {
+    pair: '',
+    buy: '',
   }
-}
 
-const mainMenu = async () => {
-  let mayExit = false
+  db = {
+    buys: db.in('buys'),
+  }
 
-  while (!mayExit) {
-    const opt = await getMenuOption(['---- Menu ----', 'Curent pair: ' + options.pair], ['Exit', 'Pairs', 'Buy', 'Buys'])
-    switch (opt.toString()) {
-      case '0': mayExit = true; break;
-      case '1': await pairsMenu(); break;
-      case '2': await buyMenu(); break;
-      case '3': await buysMenu(); break;
+  getPair(pair = '') {
+    return pairs[this.state.pair] || ''
+  }
+
+  async question(lines = [], options = [], incr = 0) {
+    console.clear()
+    console.log([...lines, ...options.map((opt, ix) => `${ix + incr}) ${opt}`)].join('\r\n'))
+    return await new Promise((res) => readline.createInterface({ input: process.stdin, output: process.stdout, terminal: false }).on('line', res))
+  }
+
+  async pairsMenu() {
+    const opt = await this.question(['---- Pairs Menu ----'], ['Exit', ...pairs])
+    this.state.pair = +opt - 1
+  }
+
+  async buyMenu() {
+    const pair = this.getPair()
+    const amount = await this.question([`---- Buy ${pair} ----`, 'How much: '])
+    this.db.buys.new().writeMany({ pair, amount, datetime: Date.now() })
+  }
+
+  async sellMenu() {
+    const buys = this.db.buys.list().map((buy) => new Buy(buy))
+    const ix = await this.question(['---- Sell ----'], ['Exit', ...buys])
+    console.log('sell', ix)
+  }
+
+  async mainMenu() {
+    let mayExit = false
+
+    while (!mayExit) {
+      const opt = await this.question(['---- Menu ----', 'Curent pair: ' + this.getPair()], ['Exit', 'Pairs', 'Buy', 'Sell'])
+      switch (opt.toString()) {
+        case '0': mayExit = true; break;
+        case '1': await this.pairsMenu(); break;
+        case '2': await this.buyMenu(); break;
+        case '3': await this.sellMenu(); break;
+      }
     }
+
+    process.exit(0)
   }
-  process.exit(0)
 }
 
-mainMenu()
+const foxbit = new Foxbit()
+
+foxbit.mainMenu()
