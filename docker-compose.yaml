@@ -8,6 +8,8 @@ services:
       - './src/app:/app'
 
   cli:
+    image: 'cli'
     build: './src/cli'
     volumes:
       - './src/cli:/app'
+      - './data:/data'
