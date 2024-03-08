@@ -1,15 +1,7 @@
 version: '3'
 
 services:
-
   app:
     build: './src/app'
     volumes:
       - './src/app:/app'
-
-  cli:
-    image: 'cli'
-    build: './src/cli'
-    volumes:
-      - './src/cli:/app'
-      - './data:/data'
